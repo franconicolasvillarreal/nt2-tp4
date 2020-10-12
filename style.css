@@ -28,7 +28,7 @@ h1 {
 	color: white;
 	
 }
-#colorDisplay {
+#color_display {
 	font-size: 200%;
 }
 
@@ -50,13 +50,9 @@ h1 {
 	max-width: 600px;
 }
 #message {
-	color: #ffffff;
+	color: #0a0404;
 	display: inline-block;
 	width: 20%;
-}
-
-#messageBox {
-	
 }
 .selected {
 	background-color: steelblue;

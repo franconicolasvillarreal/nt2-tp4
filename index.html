@@ -7,30 +7,18 @@
 </head>
 
 <body>
-	
-	<div id="header">
-		<h1>The Great <br>
-			<span id="colorDisplay">RGB</span>
-			<br>
-			Guessing Game</h1>
+	<!-- VUE -->
+	<div id="app" class="container-fluid mt-3">
+		<gameheader :my-color= 'myColor'></gameheader>
+		<buttons :my-color='myColor' :colors='colors' :message='message'></buttons>
+		<item v-for="(color, index) in colors" :color='color' :index="index" :key="myKey(color)"
+			:colors='colors' :get-ganador="getGanador">
+		</item>
 	</div>
 
-	<div id="navigator">
-		<button id="reset"> New colors</button>
-		<span id="message"> </span>
-
-		<button id="easy">easy</button>
-		<button id="hard" class="selected">hard</button>
-	</div>
-
-	<div id="container">
-		<div class="square"></div>
-		<div class="square"></div>
-		<div class="square"></div>
-		<div class="square"></div>
-		<div class="square"></div>
-		<div class="square"></div>
-	</div>
+	<!-- Vue.js CDN -->
+	<!-- development version, includes helpful console warnings -->
+	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 
 	<script type="text/javascript" src="rgbgame.js"></script>
 </body>

@@ -1,109 +1,141 @@
-var colorCount = 6;
-var isHard = true;
-var colors = [];
-var squares = document.querySelectorAll(".square");
-var colorDisplay = document.getElementById("colorDisplay");
-var messageDisplay = document.getElementById("message");
-var pickedColor = colors[PickColor()];
-var h1 = document.querySelector("h1");
-var restartButton = document.querySelector("#reset");
-var header = document.querySelector("#header");
-var easyButton = document.querySelector("#easy");
-var hardButton = document.querySelector("#hard");
-
-init();
-easyButton.addEventListener("click", function(){
-	if (isHard) {
-		isHard = false;
-		easyButton.classList.add("selected");
-		hardButton.classList.remove("selected");
-		colorCount = 3;
-		for (var i = 0; i < colorCount; i++) {
-			squares[(i+3)].style.display = "none";
-		}
-		restart();
-	}
-
-})
-hardButton.addEventListener("click", function(){
-	if (!isHard) {
-		isHard = true;
-		hardButton.classList.add("selected");
-		easyButton.classList.remove("selected");
-		colorCount = 6;
-		restart();
-		for (var i = 3; i < 6; i++) {
-			squares[i].style.display = "block";
-		}
-	}
-
+Vue.component('gameheader', { 
+    data() {
+		return{
+            
+        }
+    },
+    props: ['myColor'],
+    methods: {
+    },
+    template: `
+    <div id="header">
+		<h1>
+			The Great Guessing Game
+			<br>
+			<span id="colorDisplay">rgb({{myColor.r}}, {{myColor.g}}, {{myColor.b}})</span>	
+        </h1>
+	</div> `
 })
 
-restartButton.addEventListener("click", function(){
-	restart();
-});
+Vue.component('buttons', { 
+    data() {
+		return{
+            isHard:true,
+            colorCount:6
+        }
+    },
+    props: ['myColor','colors', 'message'],
+    created(){
+        this.restart()
+    },
+    methods: {
+        dificultadEasy(){
+            if (this.isHard) {
+                this.isHard = false;
+                this.colorCount = 3;
+                this.restart();
+            }
+        },
+        dificultadHard(){
+            if (!this.isHard) {
+                this.isHard = true;
+                this.colorCount = 6;
+                this.restart();
+            }
+        },
+        restart(){
+            this.colors.splice(0, this.colors.length, ...this.createNewColors(this.colorCount));
+            let pickedColor = this.colors[this.pickColor()];
+            this.myColor.r = pickedColor.r;
+            this.myColor.g = pickedColor.g;
+            this.myColor.b = pickedColor.b;
+        },
+        createNewColors(numbers){
+            let arr = [];
+            for (var i = 0; i < numbers; i++) {
+                arr.push(this.createRandomStringColor());
+            }
+            return arr;
+        },
+        createRandomStringColor(){
+            return {
+                r: this.randomInt(),
+                g: this.randomInt(), 
+                b: this.randomInt()
+            };
+        }, 
+        randomInt(){
+            return Math.floor(Math.random() * 256);
+        },
+        pickColor(){
+            let quantity = 3;
+            if (this.isHard) {
+                quantity = 6;
+            }
+            return Math.floor(Math.random() * quantity );
+        },        
+},
+    
+    template: `
+        <div id="navigator">
+            <button id="reset" @click="restart">New colors</button>
+            <span id="message"> {{message}} </span>
+            <button id="easy" :class="{ selected: !isHard }" @click="dificultadEasy">easy</button>
+            <button id="hard" :class="{ selected: isHard }" @click="dificultadHard">hard</button>
+    
+        </div>`
+})
 
+Vue.component('item', { 
+    data() {
+		return{
+            backgroundColor: `rgb(${this.color.r},${this.color.g},${this.color.b})`
+        };
+    },
+    props: ['color','index','getGanador'],
+    methods: {
+        mostrarColor(){
+            colorclickeado= this.color;
+            this.getGanador(colorclickeado, this.index);
+        },
+    },
+    template: `
+        <div id="container">
+            <div class="square" :style="{'background-color': backgroundColor}" @click="mostrarColor"></div>
+        </div>
+     `
+})
 
-function init(){
-	for (var i = 0; i <squares.length; i++) {
-	squares[i].style.backgroundColor = colors[i];
-	squares[i].addEventListener("click", function(){
-		var clickedColor = this.style.backgroundColor;
-		if (clickedColor === pickedColor) {
-			messageDisplay.textContent = "You Picked Right!";
-			setAllColorsTo(pickedColor);
-			restartButton.textContent = "Play Again!";
-			header.style.backgroundColor = pickedColor;
-		} else {
-			this.style.backgroundColor = "#232323";
-			messageDisplay.textContent = "Try Again!";
-			messageDisplay.style.color = "#000000";
-		}
-	});
-}
+var app = new Vue({
+    el: '#app',
+    data: {
+       myColor: {
+           r: 0,
+           g: 0,
+           b: 0
+       },
+       colors: [],
+       message:"",
+       colorclickeado:"",
+    },
 
- restart();
-}
-function setAllColorsTo(color) {
-	squares.forEach(function (square){
-		square.style.backgroundColor = color;
-	})
-}
-
-function PickColor(){
-	var quantity;
-	if (isHard) {
-		quantity = 6;
-	} else {
-		quantity = 3;
-	}
-	return Math.floor(Math.random() * quantity );
-}
-function createNewColors(numbers){
-	var arr = [];
-	for (var i = 0; i < numbers; i++) {
-		arr.push(createRandomStringColor());
-	}
-    return arr;
-}
-
-function createRandomStringColor(){
-	var newColor = "rgb(" + randomInt() + ", " + randomInt() + ", " + randomInt() + ")" ;
-//	console.log(newColor);
-	return newColor;
-}
-function randomInt(){
-	return Math.floor(Math.random() * 256);
-}
-function restart(){
-	colors = createNewColors(colorCount);
-	pickedColor = colors[PickColor()];
-	colorDisplay.textContent = pickedColor;
-	this.textContent = "Pick New Colors!";
-	header.style.backgroundColor = "steelblue";
-	messageDisplay.textContent = "";
-	restartButton.textContent = "New Colors!";
-	for (var i = 0; i <squares.length; i++) {
-		squares[i].style.backgroundColor = colors[i];
-	}
-}
+    methods: {
+        getGanador(colorcuadrado, cuadradoIndex){
+            if(JSON.stringify(colorcuadrado) === JSON.stringify(this.myColor)){
+                this.message="Ganaste";
+                for (let index = 0; index < this.colors.length; index++) {
+                    Object.assign(this.colors[index], colorcuadrado);
+                  }
+            }else{
+                this.message="Intenta de nuevo";
+                this.colors[cuadradoIndex].r = 35;
+                this.colors[cuadradoIndex].g = 35;
+                this.colors[cuadradoIndex].b = 35;
+            }
+        },
+        myKey(color){
+            const randomNumber = Math.random() * 100000;
+            return '' + randomNumber + color.r +color.g +color.b;
+        }
+    },
+})
